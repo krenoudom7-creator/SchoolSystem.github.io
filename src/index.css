@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Kantumruy Pro', 'Noto Sans Khmer', system-ui, -apple-system, sans-serif;
+  }
+  
+  .font-moul {
+    font-family: 'Moul', cursive, 'Kantumruy Pro', serif;
+  }
+
+  .font-khmer {
+    font-family: 'Noto Sans Khmer', 'Kantumruy Pro', sans-serif;
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+}
