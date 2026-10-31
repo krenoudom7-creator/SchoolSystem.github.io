@@ -19,7 +19,7 @@ import { LoginScreen } from './components/LoginScreen.tsx';
 import { PrintReportModal } from './components/PrintReportModal.tsx';
 import { checkAbsenceWarning } from './utils/calculations.ts';
 import { SCHOOL_LOGO_URL } from './utils/schoolLogo.ts';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LayoutDashboard, CalendarCheck2, GraduationCap, FileText, MoreHorizontal } from 'lucide-react';
 
 export default function App() {
   const [dbState, setDbState] = useState(() => storage.getDatabase());
@@ -152,7 +152,7 @@ export default function App() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
           {currentTab === 'dashboard' && (
             <DashboardView
               students={dbState.students}
@@ -252,6 +252,69 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar (សម្រាប់ទូរស័ព្ទដៃ) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-1.5 py-1.5 z-30 flex items-center justify-around no-print shadow-2xl safe-area-bottom">
+        <button
+          onClick={() => setCurrentTab('dashboard')}
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[10px] font-medium transition-colors cursor-pointer ${
+            currentTab === 'dashboard'
+              ? 'text-amber-400 font-bold bg-slate-800/80'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <LayoutDashboard className="w-4 h-4 mb-0.5" />
+          <span>ផ្ទាំងដើម</span>
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('attendance')}
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[10px] font-medium transition-colors cursor-pointer ${
+            currentTab === 'attendance'
+              ? 'text-amber-400 font-bold bg-slate-800/80'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <CalendarCheck2 className="w-4 h-4 mb-0.5" />
+          <span>វត្តមាន</span>
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('students')}
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[10px] font-medium transition-colors cursor-pointer ${
+            currentTab === 'students'
+              ? 'text-amber-400 font-bold bg-slate-800/80'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <GraduationCap className="w-4 h-4 mb-0.5" />
+          <span>សិស្ស</span>
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('attendance_reports')}
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[10px] font-medium transition-colors cursor-pointer ${
+            currentTab === 'attendance_reports'
+              ? 'text-amber-400 font-bold bg-slate-800/80'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <FileText className="w-4 h-4 mb-0.5" />
+          <span>របាយការណ៍</span>
+        </button>
+
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[10px] font-medium transition-colors cursor-pointer ${
+            isMobileMenuOpen
+              ? 'text-amber-400 font-bold bg-slate-800/80'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <MoreHorizontal className="w-4 h-4 mb-0.5" />
+          <span>ម៉ឺនុយ</span>
+        </button>
+      </nav>
 
       {/* Official A4 Print Modal */}
       <PrintReportModal

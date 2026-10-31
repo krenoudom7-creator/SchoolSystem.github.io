@@ -64,6 +64,17 @@ export const TelegramNotificationView: React.FC<TelegramNotificationViewProps> =
       `បានផ្ញើសារទៅកាន់ ${student.parentPhone} (អាណាព្យាបាលសិស្ស ${student.khmerName})`
     );
 
+    // Call Backend API proxy to dispatch telegram notification
+    fetch('/api/telegram/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        botToken: botSettings.botToken,
+        chatId: botSettings.chatId,
+        message: testMsg,
+      }),
+    }).catch((err) => console.warn('Telegram API proxy notice:', err));
+
     setIsSentSuccess(true);
     onRefresh();
     setTimeout(() => setIsSentSuccess(false), 3000);
