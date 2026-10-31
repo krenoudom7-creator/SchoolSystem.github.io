@@ -75,6 +75,10 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 rounded-sm">
                   ឆ្នាំសិក្សា ២០២៥-២០២៦
                 </span>
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Cloud Database Online
+                </span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium">
                 Hun Sen Toulsambour Secondary School · ឃុំទួលសំបួរ ស្រុកស្ទឹងត្រង់

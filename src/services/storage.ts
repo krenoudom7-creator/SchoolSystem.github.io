@@ -14,6 +14,18 @@ import {
   AuditLogItem,
   AttendanceStatus,
 } from '../types/index.ts';
+import {
+  startFirestoreSync,
+  syncStudentToCloud,
+  removeStudentFromCloud,
+  syncTeacherToCloud,
+  removeTeacherFromCloud,
+  syncClassToCloud,
+  removeClassFromCloud,
+  syncAttendanceRecordToCloud,
+  syncExamResultToCloud,
+  syncUserToCloud,
+} from './firebaseSync.ts';
 
 const DB_KEY = 'toulsambour_school_db_v4';
 
@@ -175,6 +187,70 @@ class StorageService {
 
   constructor() {
     this.db = this.loadDatabase();
+    this.initCloudSync();
+  }
+
+  private initCloudSync(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      startFirestoreSync({
+        onStudentsChange: (remote) => {
+          if (remote && Array.isArray(remote)) {
+            this.db.students = remote;
+            this.saveLocalOnly(this.db);
+          }
+        },
+        onTeachersChange: (remote) => {
+          if (remote && Array.isArray(remote)) {
+            this.db.teachers = remote;
+            this.saveLocalOnly(this.db);
+          }
+        },
+        onClassesChange: (remote) => {
+          if (remote && Array.isArray(remote)) {
+            this.db.classes = remote;
+            this.saveLocalOnly(this.db);
+          }
+        },
+        onAttendanceChange: (remote) => {
+          if (remote && Array.isArray(remote)) {
+            this.db.attendanceRecords = remote;
+            this.saveLocalOnly(this.db);
+          }
+        },
+        onExamResultsChange: (remote) => {
+          if (remote && Array.isArray(remote)) {
+            this.db.examResults = remote;
+            this.saveLocalOnly(this.db);
+          }
+        },
+        onUsersChange: (remote) => {
+          if (remote && remote.length > 0) {
+            const admin = this.db.users.find((u) => u.username === 'admin');
+            const merged = [...remote];
+            if (admin && !merged.some((u) => u.username === 'admin')) {
+              merged.unshift(admin);
+            }
+            this.db.users = merged;
+            this.saveLocalOnly(this.db);
+          }
+        },
+      });
+    } catch (e) {
+      console.warn('Could not initialize cloud sync:', e);
+    }
+  }
+
+  private saveLocalOnly(data: SchoolDatabase): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(DB_KEY, JSON.stringify(data));
+      }
+      this.db = data;
+      this.notifyListeners();
+    } catch (e) {
+      console.error('Failed to save to localStorage', e);
+    }
   }
 
   private loadDatabase(): SchoolDatabase {
@@ -336,6 +412,7 @@ class StorageService {
 
     this.logAudit(actorName, 'admin', 'បន្ថែមសិស្សថ្មី', `បន្ថែមសិស្ស ${newStudent.khmerName} (${newStudent.studentId})`);
     this.saveDatabase(this.db);
+    syncStudentToCloud(newStudent).catch((e) => console.warn('Cloud sync student error:', e));
     return newStudent;
   }
 
@@ -346,6 +423,7 @@ class StorageService {
     this.db.students[index] = { ...this.db.students[index], ...updates };
     this.logAudit(actorName, 'admin', 'កែប្រែព័ត៌មានសិស្ស', `កែប្រែព័ត៌មានសិស្ស ${this.db.students[index].khmerName}`);
     this.saveDatabase(this.db);
+    syncStudentToCloud(this.db.students[index]).catch((e) => console.warn('Cloud sync student error:', e));
     return true;
   }
 
@@ -363,6 +441,7 @@ class StorageService {
 
     this.logAudit(actorName, 'admin', 'លុបសិស្ស', `លុបសិស្ស ${student.khmerName} (${student.studentId})`);
     this.saveDatabase(this.db);
+    removeStudentFromCloud(student.id).catch((e) => console.warn('Cloud sync delete error:', e));
     return true;
   }
 
@@ -379,6 +458,7 @@ class StorageService {
     this.db.teachers.push(newTeacher);
     this.logAudit(actorName, 'admin', 'បន្ថែមគ្រូបង្រៀន', `បន្ថែមគ្រូ ${newTeacher.name} (${newTeacher.teacherId})`);
     this.saveDatabase(this.db);
+    syncTeacherToCloud(newTeacher).catch((e) => console.warn('Cloud sync teacher error:', e));
     return newTeacher;
   }
 
@@ -389,6 +469,7 @@ class StorageService {
     this.db.teachers[index] = { ...this.db.teachers[index], ...updates };
     this.logAudit(actorName, 'admin', 'កែប្រែព័ត៌មានគ្រូ', `កែប្រែព័ត៌មានគ្រូ ${this.db.teachers[index].name}`);
     this.saveDatabase(this.db);
+    syncTeacherToCloud(this.db.teachers[index]).catch((e) => console.warn('Cloud sync teacher error:', e));
     return true;
   }
 
@@ -399,6 +480,7 @@ class StorageService {
     this.db.teachers = this.db.teachers.filter((t) => t.id !== id && t.teacherId !== id);
     this.logAudit(actorName, 'admin', 'លុបគ្រូបង្រៀន', `លុបគ្រូ ${teacher.name}`);
     this.saveDatabase(this.db);
+    removeTeacherFromCloud(teacher.id).catch((e) => console.warn('Cloud sync delete teacher error:', e));
     return true;
   }
 
@@ -416,6 +498,7 @@ class StorageService {
     this.db.classes.push(newClass);
     this.logAudit(actorName, 'admin', 'បន្ថែមថ្នាក់រៀន', `បង្កើតថ្នាក់ ${newClass.name}`);
     this.saveDatabase(this.db);
+    syncClassToCloud(newClass).catch((e) => console.warn('Cloud sync class error:', e));
     return newClass;
   }
 
@@ -426,6 +509,7 @@ class StorageService {
     this.db.classes[index] = { ...this.db.classes[index], ...updates };
     this.logAudit(actorName, 'admin', 'កែប្រែថ្នាក់រៀន', `កែប្រែថ្នាក់ ${this.db.classes[index].name}`);
     this.saveDatabase(this.db);
+    syncClassToCloud(this.db.classes[index]).catch((e) => console.warn('Cloud sync class error:', e));
     return true;
   }
 
@@ -436,6 +520,7 @@ class StorageService {
     this.db.classes = this.db.classes.filter((c) => c.id !== id);
     this.logAudit(actorName, 'admin', 'លុបថ្នាក់រៀន', `លុបថ្នាក់ ${targetClass.name}`);
     this.saveDatabase(this.db);
+    removeClassFromCloud(id).catch((e) => console.warn('Cloud sync delete class error:', e));
     return true;
   }
 
