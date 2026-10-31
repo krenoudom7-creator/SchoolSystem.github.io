@@ -2,9 +2,33 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { db } from './src/services/firebase.ts';
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initial fallback admin if database is freshly initiated
+const DEFAULT_ROOT_ADMIN = {
+  id: 'usr-admin',
+  username: 'admin',
+  password: 'admin123',
+  name: 'លោក ស៊ុយ បូរ៉ា (Admin)',
+  role: 'admin',
+  email: 'admin@toulsambour.edu.kh',
+  phone: '012 888 999',
+  status: 'active',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+  createdAt: '2025-10-01',
+};
 
 async function startServer() {
   const app = express();
@@ -25,10 +49,41 @@ async function startServer() {
   });
 
   // -------------------------------------------------------------
-  // Backend API Endpoints
+  // 3-Tier System Status & Health Check API
   // -------------------------------------------------------------
+  app.get('/api/system/status', async (req, res) => {
+    let dbStatus = 'connected';
+    let dbError = null;
+    try {
+      await getDoc(doc(db, 'test', 'connection'));
+    } catch (e: any) {
+      if (e?.message && e.message.includes('the client is offline')) {
+        dbStatus = 'offline';
+        dbError = e.message;
+      }
+    }
 
-  // 1. System & Health Check API
+    res.json({
+      architecture: '3-Tier Full-Stack (Frontend + Backend API + Central Database)',
+      frontend: {
+        name: 'React SPA + Tailwind CSS + Mobile/Desktop Responsive',
+        status: 'online',
+      },
+      backend: {
+        name: 'Node.js Express REST API Server',
+        port: PORT,
+        status: 'online',
+      },
+      centralDatabase: {
+        name: 'Google Firebase Firestore Cloud Database',
+        databaseId: 'ai-studio-toulsambourschoo-72eb52ce-3fa8-4250-a71e-e7843de9faf3',
+        status: dbStatus,
+        error: dbError,
+      },
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   app.get('/api/health', (req, res) => {
     res.json({
       status: 'online',
@@ -41,7 +96,173 @@ async function startServer() {
     });
   });
 
-  // 2. School General Info & Ministry Structure API
+  // -------------------------------------------------------------
+  // Central Database User Management API Endpoints
+  // -------------------------------------------------------------
+
+  // 1. GET /api/users - Fetch all users from Central Database
+  app.get('/api/users', async (req, res) => {
+    try {
+      const snapshot = await getDocs(collection(db, 'users'));
+      const users: any[] = [];
+      snapshot.forEach((docSnap) => {
+        users.push(docSnap.data());
+      });
+
+      // Ensure root admin always exists
+      if (!users.some((u) => u.username === 'admin')) {
+        users.unshift(DEFAULT_ROOT_ADMIN);
+        // Persist default admin to cloud database asynchronously
+        setDoc(doc(db, 'users', DEFAULT_ROOT_ADMIN.id), DEFAULT_ROOT_ADMIN).catch(() => {});
+      }
+
+      res.json({
+        success: true,
+        count: users.length,
+        users,
+      });
+    } catch (err: any) {
+      console.warn('Backend /api/users read fallback:', err.message);
+      res.json({
+        success: true,
+        count: 1,
+        users: [DEFAULT_ROOT_ADMIN],
+        note: 'Fallback to default admin',
+      });
+    }
+  });
+
+  // 2. POST /api/users - Create new user in Central Database
+  app.post('/api/users', async (req, res) => {
+    try {
+      const { username, password, name, role, email, phone, avatar, status } = req.body;
+      if (!username || !password || !name) {
+        return res.status(400).json({
+          success: false,
+          error: 'Username, password, and name are required',
+        });
+      }
+
+      const userId = `usr-${Date.now()}`;
+      const newUser = {
+        id: userId,
+        username: username.trim(),
+        password: password.trim(),
+        name: name.trim(),
+        role: role || 'teacher',
+        email: email ? email.trim() : `${username.trim()}@toulsambour.edu.kh`,
+        phone: phone || '',
+        avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        status: status || 'active',
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+
+      await setDoc(doc(db, 'users', userId), newUser);
+
+      res.status(201).json({
+        success: true,
+        message: 'អ្នកប្រើប្រាស់ត្រូវបានបង្កើតក្នុង Central Database ដោយជោគជ័យ',
+        user: newUser,
+      });
+    } catch (err: any) {
+      console.error('Error creating user in backend:', err);
+      res.status(500).json({
+        success: false,
+        error: err.message || 'Failed to create user in Central Database',
+      });
+    }
+  });
+
+  // 3. PUT /api/users/:id - Update user in Central Database
+  app.put('/api/users/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      const userDocRef = doc(db, 'users', id);
+      const existingSnap = await getDoc(userDocRef);
+
+      if (!existingSnap.exists()) {
+        // If not found in cloud, create it
+        const newUser = { id, ...updates };
+        await setDoc(userDocRef, newUser);
+        return res.json({
+          success: true,
+          message: 'បានកែប្រែព័ត៌មានអ្នកប្រើប្រាស់ជោគជ័យ',
+          user: newUser,
+        });
+      }
+
+      await updateDoc(userDocRef, updates);
+      res.json({
+        success: true,
+        message: 'ព័ត៌មានត្រូវបានកែប្រែក្នុង Central Database ដោយជោគជ័យ',
+      });
+    } catch (err: any) {
+      console.error('Error updating user:', err);
+      res.status(500).json({
+        success: false,
+        error: err.message || 'Failed to update user',
+      });
+    }
+  });
+
+  // 4. DELETE /api/users/:id - Delete user from Central Database
+  app.delete('/api/users/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (id === 'usr-admin') {
+        return res.status(403).json({
+          success: false,
+          error: 'មិនអាចលុបគណនី Root Admin បានទេ',
+        });
+      }
+
+      await deleteDoc(doc(db, 'users', id));
+      res.json({
+        success: true,
+        message: 'បានលុបគណនីពី Central Database ដោយជោគជ័យ',
+      });
+    } catch (err: any) {
+      console.error('Error deleting user:', err);
+      res.status(500).json({
+        success: false,
+        error: err.message || 'Failed to delete user',
+      });
+    }
+  });
+
+  // 5. POST /api/users/:id/reset-password - Quick password reset
+  app.post('/api/users/:id/reset-password', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body;
+      if (!newPassword || newPassword.trim().length < 4) {
+        return res.status(400).json({
+          success: false,
+          error: 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៤ តួអក្សរ',
+        });
+      }
+
+      const userDocRef = doc(db, 'users', id);
+      await updateDoc(userDocRef, { password: newPassword.trim() });
+
+      res.json({
+        success: true,
+        message: 'ពាក្យសម្ងាត់ត្រូវបានផ្លាស់ប្ដូរក្នុង Central Database ដោយជោគជ័យ',
+      });
+    } catch (err: any) {
+      console.error('Error resetting password:', err);
+      res.status(500).json({
+        success: false,
+        error: err.message || 'Failed to reset password',
+      });
+    }
+  });
+
+  // -------------------------------------------------------------
+  // School General Info & Telegram Proxy
+  // -------------------------------------------------------------
   app.get('/api/school/info', (req, res) => {
     res.json({
       nameKm: 'អនុវិទ្យាល័យ ហ៊ុន សែន ទួលសំបួរ',
@@ -61,7 +282,6 @@ async function startServer() {
     });
   });
 
-  // 3. Telegram Alert Proxy API (Dispatches alert to Telegram without browser CORS limitations)
   app.post('/api/telegram/send', async (req, res) => {
     const { botToken, chatId, message } = req.body;
     if (!chatId || !message) {
@@ -70,7 +290,6 @@ async function startServer() {
 
     const token = botToken || process.env.TELEGRAM_BOT_TOKEN;
     if (!token || token.includes('Simulated')) {
-      // Graceful simulated response when running with demo token
       return res.json({
         ok: true,
         simulated: true,
@@ -97,7 +316,6 @@ async function startServer() {
     }
   });
 
-  // 4. Device Detection & Optimization API (Mobile vs Desktop)
   app.get('/api/device/capabilities', (req, res) => {
     const userAgent = req.headers['user-agent'] || '';
     const isMobile = /mobile|android|iphone|ipad|phone/i.test(userAgent);

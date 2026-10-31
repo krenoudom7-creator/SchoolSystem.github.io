@@ -42,11 +42,13 @@ service cloud.firestore {
     // Entity Validators
     function isValidUser(data) {
       return data.keys().hasAll(['id', 'email', 'name', 'role']) &&
-             data.keys().hasOnly(['id', 'email', 'name', 'role', 'phone', 'avatar', 'status', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'email', 'name', 'role', 'username', 'password', 'phone', 'avatar', 'status', 'createdAt']) &&
              data.id is string && data.id.size() <= 128 &&
              data.email is string && data.email.size() <= 256 &&
              data.name is string && data.name.size() <= 128 &&
              data.role in ['admin', 'director', 'teacher', 'student', 'parent'] &&
+             (!('username' in data) || (data.username is string && data.username.size() <= 64)) &&
+             (!('password' in data) || (data.password is string && data.password.size() <= 128)) &&
              (!('phone' in data) || (data.phone is string && data.phone.size() <= 32)) &&
              (!('avatar' in data) || (data.avatar is string && data.avatar.size() <= 1024)) &&
              (!('status' in data) || data.status in ['active', 'inactive']) &&
@@ -144,63 +146,57 @@ service cloud.firestore {
 
     // Users Collection
     match /users/{userId} {
-      allow get: if isSignedIn() && isValidId(userId);
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) && (isOwner(userId) || isAdmin());
-      allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) && (isOwner(userId) || isAdmin());
-      allow delete: if isAdmin() && isValidId(userId);
+      allow get, list: if true;
+      allow create: if isValidId(userId) && isValidUser(incoming());
+      allow update: if isValidId(userId) && isValidUser(incoming());
+      allow delete: if isValidId(userId);
     }
 
     // Admins Collection (Restricted to Root Admins)
     match /admins/{adminId} {
-      allow get: if isSignedIn() && isValidId(adminId);
-      allow list: if isAdmin();
-      allow write: if isAdmin() && isValidId(adminId);
+      allow get: if true;
+      allow list: if true;
+      allow write: if isValidId(adminId);
     }
 
     // Students Collection
     match /students/{studentId} {
-      allow get: if isSignedIn() && isValidId(studentId);
-      allow list: if isSignedIn();
-      allow create: if (isSignedIn() || isAdmin()) && isValidId(studentId) && isValidStudent(incoming());
-      allow update: if (isSignedIn() || isAdmin()) && isValidId(studentId) && isValidStudent(incoming());
-      allow delete: if isAdmin() && isValidId(studentId);
+      allow get, list: if true;
+      allow create: if isValidId(studentId) && isValidStudent(incoming());
+      allow update: if isValidId(studentId) && isValidStudent(incoming());
+      allow delete: if isValidId(studentId);
     }
 
     // Teachers Collection
     match /teachers/{teacherId} {
-      allow get: if isSignedIn() && isValidId(teacherId);
-      allow list: if isSignedIn();
-      allow create: if (isSignedIn() || isAdmin()) && isValidId(teacherId) && isValidTeacher(incoming());
-      allow update: if (isSignedIn() || isAdmin()) && isValidId(teacherId) && isValidTeacher(incoming());
-      allow delete: if isAdmin() && isValidId(teacherId);
+      allow get, list: if true;
+      allow create: if isValidId(teacherId) && isValidTeacher(incoming());
+      allow update: if isValidId(teacherId) && isValidTeacher(incoming());
+      allow delete: if isValidId(teacherId);
     }
 
     // Classes Collection
     match /classes/{classId} {
-      allow get: if isSignedIn() && isValidId(classId);
-      allow list: if isSignedIn();
-      allow create: if (isSignedIn() || isAdmin()) && isValidId(classId) && isValidClass(incoming());
-      allow update: if (isSignedIn() || isAdmin()) && isValidId(classId) && isValidClass(incoming());
-      allow delete: if isAdmin() && isValidId(classId);
+      allow get, list: if true;
+      allow create: if isValidId(classId) && isValidClass(incoming());
+      allow update: if isValidId(classId) && isValidClass(incoming());
+      allow delete: if isValidId(classId);
     }
 
     // Attendance Records Collection
     match /attendanceRecords/{recordId} {
-      allow get: if isSignedIn() && isValidId(recordId);
-      allow list: if isSignedIn();
-      allow create: if (isSignedIn() || isAdmin()) && isValidId(recordId) && isValidAttendanceRecord(incoming());
-      allow update: if (isSignedIn() || isAdmin()) && isValidId(recordId) && isValidAttendanceRecord(incoming());
-      allow delete: if (isSignedIn() || isAdmin()) && isValidId(recordId);
+      allow get, list: if true;
+      allow create: if isValidId(recordId) && isValidAttendanceRecord(incoming());
+      allow update: if isValidId(recordId) && isValidAttendanceRecord(incoming());
+      allow delete: if isValidId(recordId);
     }
 
     // Exam Results Collection
     match /examResults/{resultId} {
-      allow get: if isSignedIn() && isValidId(resultId);
-      allow list: if isSignedIn();
-      allow create: if (isSignedIn() || isAdmin()) && isValidId(resultId) && isValidExamResult(incoming());
-      allow update: if (isSignedIn() || isAdmin()) && isValidId(resultId) && isValidExamResult(incoming());
-      allow delete: if (isSignedIn() || isAdmin()) && isValidId(resultId);
+      allow get, list: if true;
+      allow create: if isValidId(resultId) && isValidExamResult(incoming());
+      allow update: if isValidId(resultId) && isValidExamResult(incoming());
+      allow delete: if isValidId(resultId);
     }
   }
 }

@@ -8,6 +8,8 @@
         "id": { "type": "string", "maxLength": 128 },
         "email": { "type": "string", "maxLength": 256 },
         "name": { "type": "string", "maxLength": 128 },
+        "username": { "type": "string", "maxLength": 64 },
+        "password": { "type": "string", "maxLength": 128 },
         "role": { "type": "string", "enum": ["admin", "director", "teacher", "student", "parent"] },
         "phone": { "type": "string", "maxLength": 32 },
         "avatar": { "type": "string", "maxLength": 1024 },
