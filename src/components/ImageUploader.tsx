@@ -45,15 +45,47 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('ទំហំរូបភាពធំពេក! សូមជ្រើសរើសរូបភាពក្រោម 5MB');
+      if (file.size > 10 * 1024 * 1024) {
+        alert('ទំហំរូបភាពធំពេក! សូមជ្រើសរើសរូបភាពក្រោម 10MB');
         return;
       }
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
         if (result) {
-          onImageChange(result);
+          // Compress avatar to max 400x400 to keep Firestore payload lightweight and fast
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDimension = 400;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > maxDimension) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              }
+            } else {
+              if (height > maxDimension) {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+              onImageChange(compressedDataUrl);
+            } else {
+              onImageChange(result);
+            }
+          };
+          img.onerror = () => {
+            onImageChange(result);
+          };
+          img.src = result;
         }
       };
       reader.readAsDataURL(file);

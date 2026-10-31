@@ -7,13 +7,14 @@
       "properties": {
         "id": { "type": "string", "maxLength": 128 },
         "email": { "type": "string", "maxLength": 256 },
-        "name": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 256 },
         "username": { "type": "string", "maxLength": 64 },
         "password": { "type": "string", "maxLength": 128 },
         "role": { "type": "string", "enum": ["admin", "director", "teacher", "student", "parent"] },
-        "phone": { "type": "string", "maxLength": 32 },
-        "avatar": { "type": "string", "maxLength": 1024 },
+        "phone": { "type": "string", "maxLength": 64 },
+        "avatar": { "type": "string", "maxLength": 1048576 },
         "status": { "type": "string", "enum": ["active", "inactive"] },
+        "associatedId": { "type": "string", "maxLength": 128 },
         "createdAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["id", "email", "name", "role"]
@@ -25,19 +26,20 @@
       "properties": {
         "id": { "type": "string", "maxLength": 128 },
         "studentId": { "type": "string", "maxLength": 64 },
-        "khmerName": { "type": "string", "maxLength": 128 },
-        "latinName": { "type": "string", "maxLength": 128 },
+        "khmerName": { "type": "string", "maxLength": 256 },
+        "latinName": { "type": "string", "maxLength": 256 },
         "gender": { "type": "string", "enum": ["ប្រុស", "ស្រី"] },
-        "dob": { "type": "string", "maxLength": 32 },
-        "pob": { "type": "string", "maxLength": 256 },
-        "address": { "type": "string", "maxLength": 256 },
-        "phone": { "type": "string", "maxLength": 32 },
-        "parentName": { "type": "string", "maxLength": 128 },
-        "parentPhone": { "type": "string", "maxLength": 32 },
-        "parentRelationship": { "type": "string", "maxLength": 64 },
+        "dob": { "type": "string", "maxLength": 64 },
+        "pob": { "type": "string", "maxLength": 1024 },
+        "address": { "type": "string", "maxLength": 1024 },
+        "phone": { "type": "string", "maxLength": 64 },
+        "parentName": { "type": "string", "maxLength": 256 },
+        "parentPhone": { "type": "string", "maxLength": 64 },
+        "parentRelationship": { "type": "string", "maxLength": 128 },
+        "photo": { "type": "string", "maxLength": 1048576 },
         "classId": { "type": "string", "maxLength": 64 },
         "status": { "type": "string", "enum": ["កំពុងសិក្សា", "ផ្អាកការសិក្សា", "បោះបង់", "បញ្ចប់ការសិក្សា"] },
-        "enrollmentYear": { "type": "string", "maxLength": 32 }
+        "enrollmentYear": { "type": "string", "maxLength": 64 }
       },
       "required": ["id", "studentId", "khmerName", "gender", "classId", "status"]
     },
@@ -48,15 +50,16 @@
       "properties": {
         "id": { "type": "string", "maxLength": 128 },
         "teacherId": { "type": "string", "maxLength": 64 },
-        "name": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 256 },
         "gender": { "type": "string", "enum": ["ប្រុស", "ស្រី"] },
-        "dob": { "type": "string", "maxLength": 32 },
-        "phone": { "type": "string", "maxLength": 32 },
+        "dob": { "type": "string", "maxLength": 64 },
+        "phone": { "type": "string", "maxLength": 64 },
         "email": { "type": "string", "maxLength": 256 },
-        "address": { "type": "string", "maxLength": 256 },
-        "degree": { "type": "string", "maxLength": 128 },
+        "address": { "type": "string", "maxLength": 1024 },
+        "degree": { "type": "string", "maxLength": 256 },
+        "photo": { "type": "string", "maxLength": 1048576 },
         "status": { "type": "string", "enum": ["កំពុងបង្រៀន", "សម្រាកព្យាបាល", "ផ្ទេរចេញ", "ចូលនិវត្តន៍"] },
-        "joinDate": { "type": "string", "maxLength": 32 }
+        "joinDate": { "type": "string", "maxLength": 64 }
       },
       "required": ["id", "teacherId", "name", "gender", "phone", "status"]
     },

@@ -42,16 +42,17 @@ service cloud.firestore {
     // Entity Validators
     function isValidUser(data) {
       return data.keys().hasAll(['id', 'email', 'name', 'role']) &&
-             data.keys().hasOnly(['id', 'email', 'name', 'role', 'username', 'password', 'phone', 'avatar', 'status', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'email', 'name', 'role', 'username', 'password', 'phone', 'avatar', 'status', 'createdAt', 'associatedId']) &&
              data.id is string && data.id.size() <= 128 &&
              data.email is string && data.email.size() <= 256 &&
-             data.name is string && data.name.size() <= 128 &&
+             data.name is string && data.name.size() <= 256 &&
              data.role in ['admin', 'director', 'teacher', 'student', 'parent'] &&
              (!('username' in data) || (data.username is string && data.username.size() <= 64)) &&
              (!('password' in data) || (data.password is string && data.password.size() <= 128)) &&
-             (!('phone' in data) || (data.phone is string && data.phone.size() <= 32)) &&
-             (!('avatar' in data) || (data.avatar is string && data.avatar.size() <= 1024)) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 64)) &&
+             (!('avatar' in data) || (data.avatar is string && data.avatar.size() <= 1048576)) &&
              (!('status' in data) || data.status in ['active', 'inactive']) &&
+             (!('associatedId' in data) || (data.associatedId is string && data.associatedId.size() <= 128)) &&
              (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 64));
     }
 
@@ -59,36 +60,36 @@ service cloud.firestore {
       return data.keys().hasAll(['id', 'studentId', 'khmerName', 'gender', 'classId', 'status']) &&
              data.id is string && data.id.size() <= 128 &&
              data.studentId is string && data.studentId.size() <= 64 &&
-             data.khmerName is string && data.khmerName.size() <= 128 &&
+             data.khmerName is string && data.khmerName.size() <= 256 &&
              data.gender in ['ប្រុស', 'ស្រី'] &&
              data.classId is string && data.classId.size() <= 64 &&
              data.status in ['កំពុងសិក្សា', 'ផ្អាកការសិក្សា', 'បោះបង់', 'បញ្ចប់ការសិក្សា'] &&
-             (!('latinName' in data) || (data.latinName is string && data.latinName.size() <= 128)) &&
-             (!('dob' in data) || (data.dob is string && data.dob.size() <= 32)) &&
-             (!('pob' in data) || (data.pob is string && data.pob.size() <= 256)) &&
-             (!('address' in data) || (data.address is string && data.address.size() <= 256)) &&
-             (!('phone' in data) || (data.phone is string && data.phone.size() <= 32)) &&
-             (!('parentName' in data) || (data.parentName is string && data.parentName.size() <= 128)) &&
-             (!('parentPhone' in data) || (data.parentPhone is string && data.parentPhone.size() <= 32)) &&
-             (!('parentRelationship' in data) || (data.parentRelationship is string && data.parentRelationship.size() <= 64)) &&
-             (!('photo' in data) || (data.photo is string && data.photo.size() <= 1024)) &&
-             (!('enrollmentYear' in data) || (data.enrollmentYear is string && data.enrollmentYear.size() <= 32));
+             (!('latinName' in data) || (data.latinName is string && data.latinName.size() <= 256)) &&
+             (!('dob' in data) || (data.dob is string && data.dob.size() <= 64)) &&
+             (!('pob' in data) || (data.pob is string && data.pob.size() <= 1024)) &&
+             (!('address' in data) || (data.address is string && data.address.size() <= 1024)) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 64)) &&
+             (!('parentName' in data) || (data.parentName is string && data.parentName.size() <= 256)) &&
+             (!('parentPhone' in data) || (data.parentPhone is string && data.parentPhone.size() <= 64)) &&
+             (!('parentRelationship' in data) || (data.parentRelationship is string && data.parentRelationship.size() <= 128)) &&
+             (!('photo' in data) || (data.photo is string && data.photo.size() <= 1048576)) &&
+             (!('enrollmentYear' in data) || (data.enrollmentYear is string && data.enrollmentYear.size() <= 64));
     }
 
     function isValidTeacher(data) {
       return data.keys().hasAll(['id', 'teacherId', 'name', 'gender', 'phone', 'status']) &&
              data.id is string && data.id.size() <= 128 &&
              data.teacherId is string && data.teacherId.size() <= 64 &&
-             data.name is string && data.name.size() <= 128 &&
+             data.name is string && data.name.size() <= 256 &&
              data.gender in ['ប្រុស', 'ស្រី'] &&
-             data.phone is string && data.phone.size() <= 32 &&
+             data.phone is string && data.phone.size() <= 64 &&
              data.status in ['កំពុងបង្រៀន', 'សម្រាកព្យាបាល', 'ផ្ទេរចេញ', 'ចូលនិវត្តន៍'] &&
-             (!('dob' in data) || (data.dob is string && data.dob.size() <= 32)) &&
+             (!('dob' in data) || (data.dob is string && data.dob.size() <= 64)) &&
              (!('email' in data) || (data.email is string && data.email.size() <= 256)) &&
-             (!('address' in data) || (data.address is string && data.address.size() <= 256)) &&
-             (!('degree' in data) || (data.degree is string && data.degree.size() <= 128)) &&
-             (!('photo' in data) || (data.photo is string && data.photo.size() <= 1024)) &&
-             (!('joinDate' in data) || (data.joinDate is string && data.joinDate.size() <= 32)) &&
+             (!('address' in data) || (data.address is string && data.address.size() <= 1024)) &&
+             (!('degree' in data) || (data.degree is string && data.degree.size() <= 256)) &&
+             (!('photo' in data) || (data.photo is string && data.photo.size() <= 1048576)) &&
+             (!('joinDate' in data) || (data.joinDate is string && data.joinDate.size() <= 64)) &&
              (!('assignedClassId' in data) || (data.assignedClassId is string && data.assignedClassId.size() <= 64)) &&
              (!('subjects' in data) || (data.subjects is list && data.subjects.size() <= 20));
     }
@@ -147,56 +148,55 @@ service cloud.firestore {
     // Users Collection
     match /users/{userId} {
       allow get, list: if true;
-      allow create: if isValidId(userId) && isValidUser(incoming());
-      allow update: if isValidId(userId) && isValidUser(incoming());
-      allow delete: if isValidId(userId);
+      allow create: if isValidId(userId) && (isAdmin() || isValidUser(incoming()));
+      allow update: if isValidId(userId) && (isAdmin() || isValidUser(incoming()));
+      allow delete: if isValidId(userId) && (isAdmin() || isSignedIn());
     }
 
     // Admins Collection (Restricted to Root Admins)
     match /admins/{adminId} {
-      allow get: if true;
-      allow list: if true;
-      allow write: if isValidId(adminId);
+      allow get, list: if true;
+      allow write: if isValidId(adminId) && isAdmin();
     }
 
     // Students Collection
     match /students/{studentId} {
       allow get, list: if true;
-      allow create: if isValidId(studentId) && isValidStudent(incoming());
-      allow update: if isValidId(studentId) && isValidStudent(incoming());
-      allow delete: if isValidId(studentId);
+      allow create: if isValidId(studentId) && (isAdmin() || isValidStudent(incoming()));
+      allow update: if isValidId(studentId) && (isAdmin() || isValidStudent(incoming()));
+      allow delete: if isValidId(studentId) && (isAdmin() || isSignedIn());
     }
 
     // Teachers Collection
     match /teachers/{teacherId} {
       allow get, list: if true;
-      allow create: if isValidId(teacherId) && isValidTeacher(incoming());
-      allow update: if isValidId(teacherId) && isValidTeacher(incoming());
-      allow delete: if isValidId(teacherId);
+      allow create: if isValidId(teacherId) && (isAdmin() || isValidTeacher(incoming()));
+      allow update: if isValidId(teacherId) && (isAdmin() || isValidTeacher(incoming()));
+      allow delete: if isValidId(teacherId) && (isAdmin() || isSignedIn());
     }
 
     // Classes Collection
     match /classes/{classId} {
       allow get, list: if true;
-      allow create: if isValidId(classId) && isValidClass(incoming());
-      allow update: if isValidId(classId) && isValidClass(incoming());
-      allow delete: if isValidId(classId);
+      allow create: if isValidId(classId) && (isAdmin() || isValidClass(incoming()));
+      allow update: if isValidId(classId) && (isAdmin() || isValidClass(incoming()));
+      allow delete: if isValidId(classId) && (isAdmin() || isSignedIn());
     }
 
     // Attendance Records Collection
     match /attendanceRecords/{recordId} {
       allow get, list: if true;
-      allow create: if isValidId(recordId) && isValidAttendanceRecord(incoming());
-      allow update: if isValidId(recordId) && isValidAttendanceRecord(incoming());
-      allow delete: if isValidId(recordId);
+      allow create: if isValidId(recordId) && (isAdmin() || isValidAttendanceRecord(incoming()));
+      allow update: if isValidId(recordId) && (isAdmin() || isValidAttendanceRecord(incoming()));
+      allow delete: if isValidId(recordId) && (isAdmin() || isSignedIn());
     }
 
     // Exam Results Collection
     match /examResults/{resultId} {
       allow get, list: if true;
-      allow create: if isValidId(resultId) && isValidExamResult(incoming());
-      allow update: if isValidId(resultId) && isValidExamResult(incoming());
-      allow delete: if isValidId(resultId);
+      allow create: if isValidId(resultId) && (isAdmin() || isValidExamResult(incoming()));
+      allow update: if isValidId(resultId) && (isAdmin() || isValidExamResult(incoming()));
+      allow delete: if isValidId(resultId) && (isAdmin() || isSignedIn());
     }
   }
 }
