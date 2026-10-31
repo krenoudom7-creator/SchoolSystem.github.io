@@ -18,6 +18,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { UserRole } from '../types/index.ts';
+import { SCHOOL_LOGO_URL } from '../utils/schoolLogo.ts';
 
 export type NavTab =
   | 'dashboard'
@@ -149,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="mb-3 p-3 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700/60 shadow-xs flex items-center gap-3">
           <div className="w-12 h-12 rounded-full p-0.5 bg-white border-2 border-amber-400 shadow-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
             <img
-              src="/assets/aistudio/image_1f551e19.png"
+              src={SCHOOL_LOGO_URL}
               alt="Logo អនុវិទ្យាល័យ ហ៊ុន សែន ទួលសំបួរ"
               className="w-full h-full object-cover scale-[1.38] rounded-full"
             />

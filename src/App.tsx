@@ -18,6 +18,7 @@ import { LoginModal } from './components/LoginModal.tsx';
 import { LoginScreen } from './components/LoginScreen.tsx';
 import { PrintReportModal } from './components/PrintReportModal.tsx';
 import { checkAbsenceWarning } from './utils/calculations.ts';
+import { SCHOOL_LOGO_URL } from './utils/schoolLogo.ts';
 import { Menu, X } from 'lucide-react';
 
 export default function App() {
@@ -104,9 +105,9 @@ export default function App() {
       <div className="md:hidden bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between no-print">
         <div className="flex items-center gap-2">
           <img
-            src="/assets/aistudio/image_1f551e19.png"
+            src={SCHOOL_LOGO_URL}
             alt="Logo"
-            className="w-7 h-7 object-contain rounded-full bg-white p-0.5 border border-amber-400"
+            className="w-7 h-7 object-cover scale-[1.38] rounded-full bg-white p-0.5 border border-amber-400"
           />
           <span className="font-moul text-xs text-amber-400">អនុវិទ្យាល័យ ហ៊ុន សែន ទួលសំបួរ</span>
         </div>

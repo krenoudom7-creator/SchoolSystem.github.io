@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { User, UserRole, NotificationItem } from '../types/index.ts';
 import { formatKhmerDate } from '../utils/calculations.ts';
-import { safeAvatar, DEFAULT_ADMIN_AVATAR } from '../utils/avatar.ts';
+import { safeAvatar, DEFAULT_ADMIN_AVATAR, SCHOOL_LOGO_URL } from '../utils/avatar.ts';
 
 interface HeaderProps {
   currentUser: User;
@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-full p-0.5 bg-white border-2 border-amber-400 shadow-md flex items-center justify-center flex-shrink-0 overflow-hidden">
               <img
-                src="/assets/aistudio/image_1f551e19.png"
+                src={SCHOOL_LOGO_URL}
                 alt="Logo អនុវិទ្យាល័យ ហ៊ុន សែន ទួលសំបួរ"
                 className="w-full h-full object-cover scale-[1.38] rounded-full"
               />

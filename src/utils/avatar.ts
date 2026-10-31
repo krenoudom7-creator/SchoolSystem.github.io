@@ -10,6 +10,8 @@ export const DEFAULT_TEACHER_AVATAR =
 export const DEFAULT_ADMIN_AVATAR =
   'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80';
 
+export { SCHOOL_LOGO_URL } from './schoolLogo.ts';
+
 export function safeAvatar(
   url?: string | null,
   fallback: string = DEFAULT_STUDENT_AVATAR
@@ -19,3 +21,4 @@ export function safeAvatar(
   }
   return url;
 }
+

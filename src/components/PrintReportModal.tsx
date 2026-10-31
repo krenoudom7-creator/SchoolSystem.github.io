@@ -1,6 +1,7 @@
 import React from 'react';
 import { Printer, X, Download, School, CheckCircle2 } from 'lucide-react';
 import { formatKhmerDate, getAttendanceStatusBadge } from '../utils/calculations.ts';
+import { SCHOOL_LOGO_URL } from '../utils/schoolLogo.ts';
 
 interface PrintReportModalProps {
   isOpen: boolean;
@@ -81,7 +82,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
             <div className="px-4">
               <div className="w-18 h-18 rounded-full p-0.5 border-2 border-amber-500 overflow-hidden mx-auto flex items-center justify-center shadow-xs">
                 <img
-                  src="/assets/aistudio/image_1f551e19.png"
+                  src={SCHOOL_LOGO_URL}
                   alt="Logo អនុវិទ្យាល័យ ហ៊ុន សែន ទួលសំបួរ"
                   className="w-full h-full object-cover scale-[1.38] rounded-full"
                 />
